@@ -38,7 +38,7 @@ endif()
 set(LINK_TIME_OPT FALSE)          ### DO LTO - Recommended for full release
 set(CLANG_MAX_INLINE_DEPTH 225)
 #set(BUILD_ASSET_WHEEL TRUE)      ### CI Build for generic wheels
-#set(BUILD_SPHINX_DOCS TRUE)      
+option(BUILD_DOCS OFF)      
 
 
 ################################################################################
@@ -320,7 +320,7 @@ add_subdirectory(extensions)
 # Documentation
 # READ: pip install sphinx,breathe,furo before trying to build docs
 
-if(BUILD_SPHINX_DOCS)
+if(BUILD_DOCS)
   add_subdirectory(doc)
 endif()
 
