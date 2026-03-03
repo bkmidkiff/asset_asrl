@@ -139,7 +139,7 @@ target_compile_options(astro PUBLIC ${COMPILE_FLAGS})
 #-------------------------------------------------------------------------------
 ## ASSET Python Module
 pybind11_add_module(asset main.cpp)
-
+install(TARGETS asset LIBRARY DESTINATION asset_asrl)
 
 target_compile_options(asset PUBLIC  ${COMPILE_FLAGS})
 target_link_libraries(asset PUBLIC psiopt)
@@ -155,35 +155,35 @@ target_link_libraries(asset PRIVATE ${LINK_LIBS})
 #set_target_properties(asset PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
 if(UNIX)
-    set_target_properties(asset PROPERTIES LINK_FLAGS ${LINKER_FLAGS})
+    target_link_options(asset PRIVATE ${LINKER_FLAGS})
 endif()
 
 
 
-add_custom_target(pyassetsrc ALL DEPENDS ${CMAKE_SOURCE_DIR}/asset_asrl)
+# add_custom_target(pyassetsrc ALL DEPENDS ${CMAKE_SOURCE_DIR}/asset_asrl)
 
 
-message(STATUS "CMAKE DIR LOC" ${CMAKE_CURRENT_SOURCE_DIR})
-message(STATUS "CMAKE PROJ LOC" ${CMAKE_SOURCE_DIR})
+# message(STATUS "CMAKE DIR LOC" ${CMAKE_CURRENT_SOURCE_DIR})
+# message(STATUS "CMAKE PROJ LOC" ${CMAKE_SOURCE_DIR})
 
-if(PYTHON_LOCAL_INSTALL_DIR)
-    add_custom_command(TARGET asset POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:asset> ${PYTHON_LOCAL_INSTALL_DIR}/
-    COMMENT "Copied asset.pyd to ${PYTHON_LOCAL_INSTALL_DIR}"
-    )
-    message(STATUS "Cleaning pyasset install directory")
+# if(PYTHON_LOCAL_INSTALL_DIR)
+#     add_custom_command(TARGET asset POST_BUILD
+#         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:asset> ${PYTHON_LOCAL_INSTALL_DIR}/
+#     COMMENT "Copied asset.pyd to ${PYTHON_LOCAL_INSTALL_DIR}"
+#     )
+#     message(STATUS "Cleaning pyasset install directory")
 
-    add_custom_command(TARGET pyassetsrc POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E rm -rf ${PYTHON_LOCAL_INSTALL_DIR}/asset_asrl
-                    COMMENT "Cleaning asset_asrl install directory")
+#     add_custom_command(TARGET pyassetsrc POST_BUILD
+#                     COMMAND ${CMAKE_COMMAND} -E rm -rf ${PYTHON_LOCAL_INSTALL_DIR}/asset_asrl
+#                     COMMENT "Cleaning asset_asrl install directory")
 
-    add_custom_command(TARGET pyassetsrc POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_SOURCE_DIR}/asset_asrl
-                                                ${PYTHON_LOCAL_INSTALL_DIR}/asset_asrl
-                    DEPENDS ${CMAKE_SOURCE_DIR}/asset_asrl
-                    COMMENT "Copied asset_asrl to ${PYTHON_LOCAL_INSTALL_DIR}")
+#     add_custom_command(TARGET pyassetsrc POST_BUILD
+#                     COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_SOURCE_DIR}/asset_asrl
+#                                                 ${PYTHON_LOCAL_INSTALL_DIR}/asset_asrl
+#                     DEPENDS ${CMAKE_SOURCE_DIR}/asset_asrl
+#                     COMMENT "Copied asset_asrl to ${PYTHON_LOCAL_INSTALL_DIR}")
 
-endif()
+# endif()
 
 
     

@@ -159,20 +159,11 @@ if(NOT WIN32)
   list(APPEND RELEASE_FLAGS "-fno-asynchronous-unwind-tables")
   list(APPEND RELEASE_FLAGS "-ffast-math")
 endif()
- 
-if(APPLE)
-  list(APPEND COMMON_FLAGS "-Xlinker -undefined")
-  list(APPEND COMMON_FLAGS "-Xlinker dynamic_lookup")
-endif()
-
-
 
 # Combine Flags
 set(COMPILE_FLAGS PUBLIC ${COMMON_FLAGS})
 list(APPEND COMPILE_FLAGS "$<$<OR:$<CONFIG:RELEASE>,$<CONFIG:RELWITHDEBINFO>>:${RELEASE_FLAGS}>")
 list(APPEND COMPILE_FLAGS "$<$<OR:$<CONFIG:DEBUG>,$<CONFIG:RELWITHDEBINFO>>:${DEBUG_FLAGS}>")
-
-
 
 ################################################################################
 ################## ASSET PREPROCCESSOR MACROS  #################################
@@ -258,18 +249,16 @@ elseif(APPLE)
   
 endif()
 
-find_package(MKL REQUIRED)
+find_package(MKL CONFIG REQUIRED)
 
 find_package(Python ${PYVERSION_EXACT} REQUIRED COMPONENTS Interpreter Development)
 
 # Set dependency variables
-set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${MKL_INCLUDE_DIRS})
-set(LINK_LIBS ${PYTHON_LIBRARIES} ${MKL_LIBRARIES} Threads::Threads ${CMAKE_DL_LIBS})
+set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${MKL_H})
+set(LINK_LIBS ${PYTHON_LIBRARIES} MKL::MKL Threads::Threads ${CMAKE_DL_LIBS})
 if(UNIX)
   list(APPEND LINK_LIBS m)
 endif()
-
-
 
 ################################################################################
 ################ Linker Flags ##################################################
@@ -277,32 +266,10 @@ if(BUILD_SHARED_LIBS AND NOT APPLE AND NOT WIN32)  # Windows and Linux Dynamic L
   list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl, --end-group")
 elseif(UNIX AND NOT APPLE)  # Linux Static Linking
   list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl,--end-group")
-elseif(APPLE)  # Apple Dynamic and Static Linking
-
+elseif(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")  # Apple Dynamic and Static Linking
   list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Xlinker -undefined -Xlinker dynamic_lookup")
 else()  # Windows Static Linking
   list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS}")
-endif()
-
-###########################################################
-######## Find Correct Python Install Location  ############
-
-
-if(NOT PIP_INSTALL)
-  if(WIN32)
-    set(PYTHON_LOCAL_INSTALL_DIR ${Python_SITEARCH})
-    
-  else()
-    execute_process ( COMMAND ${PYTHON_EXECUTABLE} -m site --user-site
-    OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
-    set(PYTHON_LOCAL_INSTALL_DIR ${PYTHON_SITE_PACKAGES})
-  endif()
-
-  if(PYTHON_LOCAL_INSTALL_DIR)
-    message(STATUS "ASSET will be installed to " ${PYTHON_LOCAL_INSTALL_DIR})
-  else()
-    message(STATUS "Could not find appropriate install directory")
-  endif()
 endif()
 
 message(STATUS "CMAKE DIR LOC" ${CMAKE_CURRENT_SOURCE_DIR})
@@ -316,7 +283,6 @@ add_subdirectory(src)
 
 add_subdirectory(extensions)
 
-
 # Documentation
 # READ: pip install sphinx,breathe,furo before trying to build docs
 
@@ -324,8 +290,5 @@ if(BUILD_SPHINX_DOCS)
   add_subdirectory(doc)
 endif()
 
-add_subdirectory(pypiwheel)
-
 # Formatting
 include(cmake/clang-format.cmake)
-

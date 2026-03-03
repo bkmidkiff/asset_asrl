@@ -1,0 +1,29 @@
+[build-system]
+requires = ["scikit-build-core>=0.4", "pybind11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "asset_asrl"
+version = "0.5.2"
+description = "High-speed, extensible, object-oriented trajectory design and optimization"
+requires-python = ">=3.7"
+license = 'Apache-2.0'
+license-files = ["LICEN[CS]E.*" , "notices/*"]
+readme = "README.md"
+dependencies = [
+    "numpy",
+    "matplotlib",
+    "spiceypy",
+    "seaborn",
+    "basemap",
+    "intel-openmp",
+]
+
+[project.urls]
+Homepage = "https://sites.ua.edu/asrl/asset/"
+Documentation = "https://alabamaasrl.github.io/asset_asrl/"
+Repository = "https://github.com/AlabamaASRL/asset_asrl.git"
+
+[tool.scikit-build]
+build-dir = "build"
+wheel.packages = ["asset_asrl"]
