@@ -249,12 +249,14 @@ elseif(APPLE)
   
 endif()
 
+# MKL
+set(MKL_INTERFACE lp64)
 find_package(MKL CONFIG REQUIRED)
 
 find_package(Python ${PYVERSION_EXACT} REQUIRED COMPONENTS Interpreter Development)
 
 # Set dependency variables
-set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${MKL_H})
+set(INCLUDE_DIRS ${PYBIND11_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${MKL_INCLUDE})
 set(LINK_LIBS ${PYTHON_LIBRARIES} MKL::MKL Threads::Threads ${CMAKE_DL_LIBS})
 if(UNIX)
   list(APPEND LINK_LIBS m)
@@ -263,13 +265,13 @@ endif()
 ################################################################################
 ################ Linker Flags ##################################################
 if(BUILD_SHARED_LIBS AND NOT APPLE AND NOT WIN32)  # Windows and Linux Dynamic Linking
-  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl, --end-group")
+  list(APPEND LINKER_FLAGS "-Wl,--no-undefined")
 elseif(UNIX AND NOT APPLE)  # Linux Static Linking
-  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Wl,--no-undefined -Wl,--start-group ${MKL_LIBRARIES_LIST} -Wl,--end-group")
+  list(APPEND LINKER_FLAGS "-Wl,--no-undefined")
 elseif(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang")  # Apple Dynamic and Static Linking
-  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS} -Xlinker -undefined -Xlinker dynamic_lookup")
+  list(APPEND LINKER_FLAGS "-Xlinker -undefined -Xlinker dynamic_lookup")
 else()  # Windows Static Linking
-  list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS}")
+  # list(APPEND LINKER_FLAGS "${OpenMP_CXX_FLAGS}")
 endif()
 
 message(STATUS "CMAKE DIR LOC" ${CMAKE_CURRENT_SOURCE_DIR})
